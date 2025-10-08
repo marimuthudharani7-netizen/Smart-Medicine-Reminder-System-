@@ -1,0 +1,41 @@
+DISCRIPTION: The Smart Medicine Reminder System alerts patients to take their medication on time.
+It uses a Real-Time Clock (RTC) with Arduino/NodeMCU and can trigger a buzzer or IoT notification (Blynk app) when it’s time for the medicine — ensuring timely medication adherence.
+CODING:
+#include <Wire.h>
+#include <RTClib.h>
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+
+RTC_DS3231 rtc;
+#define BLYNK_AUTH_TOKEN "YourAuthToken"
+char auth[] = BLYNK_AUTH_TOKEN;
+char ssid[] = "YourWiFi";
+char pass[] = "YourPassword";
+
+#define buzzer D2
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+  rtc.begin();
+  pinMode(buzzer, OUTPUT);
+  Blynk.begin(auth, ssid, pass);
+}
+
+void loop() {
+  Blynk.run();
+  DateTime now = rtc.now();
+
+  int hour = now.hour();
+  int minute = now.minute();
+
+  // Example medicine time 08:00 AM
+  if(hour == 8 && minute == 0){
+    digitalWrite(buzzer, HIGH);
+    Blynk.notify("💊 Time to take your medicine!");
+    delay(3000);
+    digitalWrite(buzzer, LOW);
+  }
+
+  delay(60000); // Check every minute
+}
